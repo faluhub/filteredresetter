@@ -1,0 +1,55 @@
+name: Build mapless-practice
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get submodules
+        run: git submodule update --init --recursive
+
+      - name: Get zig
+        run: |
+          curl https://ziglang.org/download/0.9.1/zig-linux-x86_64-0.9.1.tar.xz -o zig.tar.xz
+          tar xf zig.tar.xz
+
+      - name: Build for Linux x86_64
+        run: |
+          ./zig-linux-x86_64-0.9.1/zig cc -lm -O3 -o mapless-x86_64-linux -I cubiomes finder.c \
+              cubiomes/biome_tree.c \
+              cubiomes/finders.c \
+              cubiomes/generator.c \
+              cubiomes/layers.c \
+              cubiomes/noise.c \
+              cubiomes/util.c
+
+      - name: Build for Windows x86_64
+        run: |
+          ./zig-linux-x86_64-0.9.1/zig cc -lm -O3 -o mapless-windows.exe \
+              -target x86_64-windows-gnu \
+              -I cubiomes \
+              finder.c \
+              cubiomes/biome_tree.c \
+              cubiomes/finders.c \
+              cubiomes/generator.c \
+              cubiomes/layers.c \
+              cubiomes/noise.c \
+              cubiomes/util.c
+
+      - name: Generate tag name
+        id: tag
+        run: echo "::set-output name=sha::$(git rev-parse --short HEAD)"
+
+      - name: Publish release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "mapless-x86_64-linux,mapless-windows.exe"
+          tag: ${{ steps.tag.outputs.sha }}
+          token: ${{ secrets.GITHUB_TOKEN }}
