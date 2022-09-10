@@ -22,7 +22,7 @@ Loop, %windows% {
 
 DownloadSeedFinder()
 {
-    downloadCommand := "curl.exe https://download1073.mediafire.com/s368lb7jbvxg/vge1pgr2dv3bvvo/filter.exe --output " . finder_file
+    downloadCommand := "curl.exe https://download1073.mediafire.com/79ljziu2l9mg/vge1pgr2dv3bvvo/filter.exe --output " . finder_file
     RunWait, %downloadCommand%,, Hide
 }
 
